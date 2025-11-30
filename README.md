@@ -23,7 +23,9 @@ It allows users to deploy web projects directly from GitHub repositories, run bu
 
 ## 🧩 Architecture Overview
 
-![Architecture Diagram](./0c2c6f86-ae59-4478-b9f5-4bf6c6152a15.png)
+[Architecture Diagram]
+
+<img width="2280" height="878" alt="68747470733a2f2f692e696d6775722e636f6d2f7237515558715a2e706e67" src="https://github.com/user-attachments/assets/1e36bf79-64df-4bd1-bbe4-62a63aa508db" />
 
 ### Services and Ports
 
