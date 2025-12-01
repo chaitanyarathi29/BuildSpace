@@ -33,7 +33,7 @@ async function init() {
     p.on('close', async function() {
         console.log('Build Complete');
         const distFolderPath = path.join(__dirname, 'output', 'dist');
-        const distFolderContents = fs.readdirSync(distFolderPath, {recursive: true} )
+        const distFolderContents = fs.readdirSync(distFolderPath, {recursive: true} )  //["index.html","assets","assets/app.js","assets/style.css"]
  
         for(const file of distFolderContents) {
             const filePath = path.join(distFolderPath, file);
@@ -45,7 +45,7 @@ async function init() {
                 Bucket: 'buildspace-vercel-clone',
                 Key: `__outputs/${PROJECT_ID}/${file}`,
                 Body: fs.createReadStream(filePath),
-                ContentType: mime.lookup(filePath) 
+                ContentType: mime.lookup(filePath) // tells browser how to interpret the file like js,html
             })
 
             await s3Client.send(command);
