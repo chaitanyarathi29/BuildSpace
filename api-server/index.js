@@ -2,7 +2,25 @@ const express = require('express');
 const { generateSlug } = require('random-word-slugs');
 const { ECSClient, RunTaskCommand } = require('@aws-sdk/client-ecs');
 const dotenv = require('dotenv');
+const Redis = require('ioredis');
+const { Server } = require('socket.io');
 dotenv.config();
+
+const app = express();
+const PORT = 9000;
+
+const subscriber = new Redis("rediss://default:AZStAAIncDIxNThmZWY4ZjMyMzU0MzM3OGU5ZjlmNWM1NzhmNWRkZnAyMzgwNjE@chief-elephant-38061.upstash.io:6379");
+
+const io = new Server({ cors: '*' });
+
+io.on('connection', socket => {
+    socket.on('subscribe', channel => {
+        socket.join(channel)
+        socket.emit('message', `Joined ${channel}`)
+    })
+})
+
+io.listen(9002, () => console.log(`Socket server is listening at port 9002`))
 
 const ecsClient = new ECSClient({
     region: 'eu-north-1',
@@ -17,14 +35,11 @@ const config = {
     TASK: process.env.TASK_ARN
 }
 
-const app = express();
-const PORT = 9000;
-
 app.use(express.json());
 
 app.post('/project', async (req, res) => {
-    const {gitUrl} = req.body;
-    const projectSlug = generateSlug();
+    const { gitUrl, slug } = req.body;
+    const projectSlug = slug ? slug : generateSlug();
 
     const command = new RunTaskCommand({
         cluster: config.CLUSTER,
@@ -49,12 +64,22 @@ app.post('/project', async (req, res) => {
                 }
             ]
         }
-    })
+    });
     await ecsClient.send(command);
 
-    return res.json({ status: 'queued', data: { projectSlug, url:`http://${projectSlug}.localhost:8000`}})
+    return res.json({ status: 'queued', data: { projectSlug, url:`http://${projectSlug}.localhost:8000` } })
 
 })
 
+async function initRedisSubscribe(){
+    console.log('Subscribed to logs...')
+    subscriber.psubscribe('logs:*');
+    subscriber.on('pmessage', (pattern, channel, message) => {
+        console.log(`[${channel}] ${message}`);
+        io.to(channel).emit('message', message); 
+    })
+}
+
+initRedisSubscribe();
 
 app.listen(PORT, () => {console.log(`API server Running...${PORT}`)});
