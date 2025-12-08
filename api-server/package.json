@@ -11,10 +11,19 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-ecs": "^3.940.0",
-    "dotenv": "^17.2.3",
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
     "express": "^5.1.0",
     "ioredis": "^5.8.2",
+    "pg": "^8.16.3",
     "random-word-slugs": "^0.1.7",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.1.0"
   }
 }
