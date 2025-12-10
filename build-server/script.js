@@ -4,10 +4,8 @@ const fs = require('fs');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const mime = require('mime-types');
 const dotenv = require('dotenv');
-const Redis = require('ioredis');
+const { Kafka } = require('kafkajs');
 dotenv.config();
-
-const publisher = new Redis("rediss://default:AZStAAIncDIxNThmZWY4ZjMyMzU0MzM3OGU5ZjlmNWM1NzhmNWRkZnAyMzgwNjE@chief-elephant-38061.upstash.io:6379");
 
 const s3Client = new S3Client({
     region: 'eu-north-1',
@@ -20,29 +18,47 @@ const s3Client = new S3Client({
 const PROJECT_ID = process.env.PROJECT_ID;
 const DEPLOYEMENT_ID = process.env.DEPLOYEMENT_ID;
 
-function publishLog(log){
-    publisher.publish(`logs:${PROJECT_ID}`, JSON.stringify({ log }));
+const kafka = new Kafka({
+    clientId: `docker-build-server-${DEPLOYEMENT_ID}`,
+    brokers: ['kafka-1294ff1-chaitanyarathi91-621c.d.aivencloud.com:14027'],
+    ssl: {
+        ca: [ fs.readFileSync(path.join(__dirname, 'kafka.pem'), 'utf-8')]
+    },
+    sasl: {
+        username: 'avnadmin',
+        password: 'AVNS_yJnX8lMpmR7Trf4s3h0',
+        mechanism: 'plain'
+    }
+})
+
+const producer = kafka.producer()
+
+async function publishLog(log){
+    await producer.send({topic: `container-logs`, messages: [{key: 'log', value: JSON.stringify({ PROJECT_ID, DEPLOYEMENT_ID, log})}]})
 }
 
 async function init() {
+
+    await producer.connect()
+
     console.log("Executing script.js");
-    publishLog('Build Started...');
+    await publishLog('Build Started...');
     const outDirPath = path.join(__dirname, 'output');
   
     const p = exec(`cd ${outDirPath} && npm install && npm run build`)
 
-    p.stdout.on('data', function (data) {
-        publishLog(data.toString());
+    p.stdout.on('data', async function (data) {
+        await publishLog(data.toString());
         console.log(data.toString());
     })
 
-    p.stdout.on('error', function (data) {
-        publishLog(`error: ${data.toString()}`);
+    p.stdout.on('error', async function (data) {
+        await publishLog(`error: ${data.toString()}`);
         console.log("Error", data.toString());
     })
 
     p.on('close', async function() {
-        publishLog('Build Complete');
+        await publishLog('Build Complete');
         console.log('Build Complete');
         const distFolderPath = path.join(__dirname, 'output', 'dist');
         const distFolderContents = fs.readdirSync(distFolderPath, {recursive: true} )  //["index.html","assets","assets/app.js","assets/style.css"]
@@ -67,7 +83,7 @@ async function init() {
             console.log("uploaded", filePath);
 
         }
-        publishLog("Done!");
+        await publishLog("Done!");
         console.log('Done!');
         process.exit(0);
     }) 
