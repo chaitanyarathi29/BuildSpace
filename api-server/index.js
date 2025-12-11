@@ -27,17 +27,17 @@ const kafka = new Kafka({
         ca: [ fs.readFileSync(path.join(__dirname, 'kafka.pem'), 'utf-8')]
     },
     sasl: {
-        username: '',
-        password: '',
-        mechanism: ''
+        username: 'process.env.SASL_USERNAME',
+        password: 'process.env.SASL_PASSWORD',
+        mechanism: 'process.env.SASL_MECHANISM'
     }
 });
 
 const client = createClient({
-    host: '',
-    database: '',
-    username: '',
-    password: ''
+    host: 'process.env.SASL_CLICKHOUSE_HOST',
+    database: 'process.env.CLICKHOUSE_DATABASE',
+    username: 'process.env.CLICKHOUSE_USERNAME',
+    password: 'process.env.CLICKHOUSE_PASSWORD'
 });
 
 const consumer = kafka.consumer({ groupId: ''})
