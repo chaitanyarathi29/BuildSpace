@@ -4,7 +4,7 @@ const httpProxy = require('http-proxy');
 const app = express();
 const PORT = 8000;
 const prisma  = require('../api-server/index.js');
-const BASE_PATH = 'https://buildspace-vercel-clone.s3.eu-north-1.amazonaws.com/__outputs'
+const BASE_PATH = ''
 
 
 const proxy = httpProxy.createProxy();
@@ -17,8 +17,6 @@ app.use(async (req, res) => {
         where: { subDomain: subdomain },
         select: { id: true }
     })
-    console.log('----------------------------------------------');
-    console.log(project);
 
     const resolvesTo = `${BASE_PATH}/${project.id}`
 

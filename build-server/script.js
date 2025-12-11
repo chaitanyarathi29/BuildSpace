@@ -8,7 +8,7 @@ const { Kafka } = require('kafkajs');
 dotenv.config();
 
 const s3Client = new S3Client({
-    region: 'eu-north-1',
+    region: '',
     credentials: {
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.SECRET_ACCESS_KEY_ID
@@ -20,14 +20,14 @@ const DEPLOYEMENT_ID = process.env.DEPLOYEMENT_ID;
 
 const kafka = new Kafka({
     clientId: `docker-build-server-${DEPLOYEMENT_ID}`,
-    brokers: ['kafka-1294ff1-chaitanyarathi91-621c.d.aivencloud.com:14027'],
+    brokers: [''],
     ssl: {
         ca: [ fs.readFileSync(path.join(__dirname, 'kafka.pem'), 'utf-8')]
     },
     sasl: {
-        username: 'avnadmin',
-        password: 'AVNS_yJnX8lMpmR7Trf4s3h0',
-        mechanism: 'plain'
+        username: '',
+        password: '',
+        mechanism: ''
     }
 })
 

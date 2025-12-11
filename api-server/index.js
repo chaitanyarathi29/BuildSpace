@@ -4,6 +4,7 @@ const { ECSClient, RunTaskCommand } = require('@aws-sdk/client-ecs');
 const dotenv = require('dotenv');
 const { z } = require('zod');
 const fs = require('fs');
+const cors = require('cors');
 const path = require('path');
 const {v4: uuidv4} = require('uuid');
 const { PrismaClient } = require('./generated/prisma/client');
@@ -16,31 +17,33 @@ module.exports = prisma = new PrismaClient({
 })
 const app = express();
 const PORT = 9000;
+app.use(cors());
+app.use(express.json());
 
 const kafka = new Kafka({
     clientId: `api-server`,
-    brokers: ['kafka-1294ff1-chaitanyarathi91-621c.d.aivencloud.com:14027'],
+    brokers: [''],
     ssl: {
         ca: [ fs.readFileSync(path.join(__dirname, 'kafka.pem'), 'utf-8')]
     },
     sasl: {
-        username: 'avnadmin',
-        password: 'AVNS_yJnX8lMpmR7Trf4s3h0',
-        mechanism: 'plain'
+        username: '',
+        password: '',
+        mechanism: ''
     }
 });
 
 const client = createClient({
-    host: 'https://avnadmin:AVNS_pzbwg8rXs9YvCJQ45Ak@clickhouse-3831f89c-chaitanyarathi91-621c.c.aivencloud.com:14015',
-    database: 'buildspace-vercel-clone',
-    username: 'avnadmin',
-    password: 'AVNS_pzbwg8rXs9YvCJQ45Ak'
+    host: '',
+    database: '',
+    username: '',
+    password: ''
 });
 
 const consumer = kafka.consumer({ groupId: 'api-server-logs-consumer'})
 
 const ecsClient = new ECSClient({
-    region: 'eu-north-1',
+    region: '',
     credentials: {
         accessKeyId: process.env.ACCESS_KEY_ID,
         secretAccessKey: process.env.SECRET_ACCESS_KEY_ID
@@ -51,8 +54,6 @@ const config = {
     CLUSTER: process.env.CLUSTER_ARN,
     TASK: process.env.TASK_ARN
 }
-
-app.use(express.json());
 
 app.get('/logs/:id', async (req, res) => {
     const id = req.params.id;
@@ -116,8 +117,8 @@ app.post('/deploy', async (req, res) => {
         networkConfiguration: {
             awsvpcConfiguration: {
                 assignPublicIp: 'ENABLED',
-                subnets: ['subnet-0bd8453ed958ffd08','subnet-0abff033857c9c12c','subnet-0a62a0cc8342b2980'],
-                securityGroups: ['sg-0fc91e4539c0b567d']
+                subnets: [''],
+                securityGroups: ['']
             }
         },
         overrides: {
