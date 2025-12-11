@@ -44,64 +44,7 @@
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          BUILDSPACE PLATFORM                            │
-└─────────────────────────────────────────────────────────────────────────┘
-
-                                  CLIENT
-                                    │
-                    ┌───────────────┼───────────────┐
-                    │               │               │
-              API Requests    HTTP Polling      Reverse Proxy
-              (Deploy)        (Get Logs)        (View Output)
-                    │               │               │
-                    ▼               ▼               ▼
-            ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-            │  API Server  │  │  API Server  │  │ S3 Reverse   │
-            │  :9000       │  │  :9000       │  │ Proxy :8000  │
-            │              │  │              │  │              │
-            │ • Express    │  │ • ClickHouse │  │ • http-proxy │
-            │ • ECS Client │  │   Query      │  │ • Subdomain  │
-            │ • Prisma ORM │  │ • Kafka      │  │   routing    │
-            │ • Zod        │  │   Consumer   │  │              │
-            └──────────────┘  └──────────────┘  └──────────────┘
-                    │               ▲               │
-                    │               │               │
-        ┌───────────┴─────────────┬─┴───────────┐  │
-        │                         │             │  │
-        ▼                         ▼             ▼  ▼
-    ┌────────────────────────┐  ┌──────────┐  ┌────────┐
-    │    AWS ECS Cluster     │  │  Kafka   │  │   S3   │
-    │                        │  │  Broker  │  │ Bucket │
-    │ • Fargate Tasks        │  │          │  │        │
-    │ • Build Server         │  │ Topics:  │  │ Output │
-    │   Container            │  │ • logs   │  │ Folder │
-    │ • Git Clone            │  │          │  │        │
-    │ • npm build            │  └──────────┘  └────────┘
-    │ • S3 Upload            │       │
-    │                        │       ▼
-    └────────────────────────┘  ┌──────────────────┐
-                                │   ClickHouse     │
-                                │   Database       │
-                                │                  │
-                                │ • log_events     │
-                                │ • deployment_id  │
-                                │ • timestamp      │
-                                └──────────────────┘
-
-    ┌──────────────────────────────────────────────────────┐
-    │         PostgreSQL (Project Metadata)                │
-    │                                                       │
-    │ Tables:                                               │
-    │ • users (id, firstName, lastName, email, password)   │
-    │ • projects (id, name, gitURL, subdomain)             │
-    │ • deployments (id, projectId, status, createdAt)     │
-    │ • log_events (id, deploymentId, log, timestamp)      │
-    └──────────────────────────────────────────────────────┘
-```
-
----
+<img width="1562" height="1404" alt="Screenshot 2025-12-10 234945" src="https://github.com/user-attachments/assets/f6759cfb-1b41-42b2-b039-b4d94e162a0d" />
 
 ## Tech Stack
 
@@ -656,6 +599,8 @@ ORDER BY (deployment_id, timestamp);
 ## Build Logs
 
 ### Architecture
+
+
 
 ```
 Build Server (Docker)
