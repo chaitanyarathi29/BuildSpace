@@ -40,7 +40,7 @@ const client = createClient({
     password: ''
 });
 
-const consumer = kafka.consumer({ groupId: 'api-server-logs-consumer'})
+const consumer = kafka.consumer({ groupId: ''})
 
 const ecsClient = new ECSClient({
     region: '',
